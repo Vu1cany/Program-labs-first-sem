@@ -1,4 +1,4 @@
-/*#include <stdio.h>
+#include <stdio.h>
 
 int main() {
     int time, subFee, costMinute;
@@ -12,10 +12,10 @@ int main() {
     int fullCost = subFee;
 
     if (time > limit) {
-        fullCost+= (time - limit)*costMinute;
+        fullCost += (time - limit) * costMinute;
     }
 
     printf("Monthly maintenance cost: %d", fullCost);
 
     return 0;
-}*/
+}
