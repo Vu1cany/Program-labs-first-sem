@@ -3,4 +3,4 @@ project(Program_11 C)
 
 set(CMAKE_C_STANDARD 17)
 
-add_executable(Program_11 main.c)
+add_executable(Program_11 main.c Rings.c Rings.h)
