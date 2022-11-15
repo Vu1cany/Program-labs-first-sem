@@ -18,11 +18,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a07188cd-46ef-4a74-9340-080e605f952d" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../LAB 10/Program 10/Fifth_task.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../LAB 10/Program 10/Fifth_task.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LAB 10/Program 10/second_task.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../LAB 10/Program 10/second_task.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../LAB 11/Program 11/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../LAB 11/Program 11/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LAB 11/Program 11/Rings.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../LAB 11/Program 11/Rings.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LAB 9/Program 9/fifth_task.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../LAB 9/Program 9/fifth_task.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LAB 9/Program 9/second_task.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../LAB 9/Program 9/second_task.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,6 +79,8 @@
       <workItem from="1667600334046" duration="2000" />
       <workItem from="1668347475446" duration="7830000" />
       <workItem from="1668426505032" duration="13345000" />
+      <workItem from="1668503503355" duration="2250000" />
+      <workItem from="1668510989386" duration="299000" />
     </task>
     <servers />
   </component>
