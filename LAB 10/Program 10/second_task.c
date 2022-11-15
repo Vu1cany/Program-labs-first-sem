@@ -1,3 +1,4 @@
+/*
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -35,6 +36,7 @@ int main() {
     double **distArr = distances(arr, n);
 
     for (int i = 0; i < n; ++i) {
+        printf("P%d: ", i + 1);
         for (int j = 0; j < n-1; ++j) {
             printf("%.2lf ", distArr[i][j]);
         }
@@ -44,3 +46,4 @@ int main() {
 
     return 0;
 }
+*/
