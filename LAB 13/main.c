@@ -35,7 +35,7 @@ typedef struct {
 #pragma pop
 
 BMP* ReadBMPFile(char *fileName) {   //Функция для считывания BMP
-    FILE* file = fopen(fileName, "r");  //Открываем поток на чтение
+    FILE* file = fopen(fileName, "rb");  //Открываем поток на чтение
 
     BMP* bmp = malloc(sizeof(BMP));
 
@@ -58,24 +58,6 @@ BMP* ReadBMPFile(char *fileName) {   //Функция для считывани�
     return bmp;
 }
 
-/*void PixelInfo(BMP* fbmp) { //Вывод информации о бмп
-
-    printf("%c%c\n",fbmp->fileHeader.Type[0], fbmp->fileHeader.Type[1]);
-    printf("%d\n", fbmp->fileHeader.Size);
-    printf("%d\n", fbmp->fileHeader.Reserved1);
-    printf("%d\n", fbmp->fileHeader.OffBits);
-    printf("%d\n", fbmp->InfoHeader.BitCount);
-    printf("%d\n", fbmp->InfoHeader.Width);
-    printf("%lu\n", sizeof(fbmp->ColorTable));
-
-    for (int i = fbmp->InfoHeader.Height - 1; i >= 0; --i) {
-        for (int j = 0; j < fbmp->InfoHeader.Width + (3*fbmp->InfoHeader.Width % 4); ++j) {
-            printf("%d ", fbmp->arr[i][j]);
-        }
-        printf("\n");
-    }
-}*/
-
 void Free(BMP *bmp, char** array, unsigned int width, unsigned int height) {    //Освобождаем память для всех указателей
     for (int i = 0; i < height; ++i) {  //Освобождение памяти для массива пикселей
         free(array[i]);
@@ -86,7 +68,7 @@ void Free(BMP *bmp, char** array, unsigned int width, unsigned int height) {    
 }
 
 unsigned long long Logic(BMP *bmp) {
-    unsigned char ArrNew[bmp->InfoHeader.Height][bmp->InfoHeader.Width];
+    unsigned char ArrNew[bmp->InfoHeader.Height][bmp->InfoHeader.Width];    //Массив новых пикселей
 
     short flag = 0;
 
@@ -143,25 +125,24 @@ unsigned long long Logic(BMP *bmp) {
         }
     }
 
-    unsigned long long pointCount = 0;
+    unsigned long long pointCount = 0;      //Колличество живых клеток
 
     for (int i = bmp->InfoHeader.Height - 1; i >= 0; --i) {     //Записываем в массив пикселей новые значения
         for (int j = 0; j < bmp->InfoHeader.Width; ++j) {
             if (bmp->arr[i][j] != ArrNew[i][j]) {
-                //flag = 1;
                 bmp->arr[i][j] = ArrNew[i][j];
             }
 
-            if ((int)ArrNew[i][j] == 0) pointCount++;
+            if ((int)ArrNew[i][j] == 0) pointCount++;   //Подсчет живых клеток
         }
     }
-    if (flag) {
+    if (flag) {     //Если картинка хоть как-то изменилась то выводим количиство пикслей
         return pointCount;
-    } else return 0;
+    } else return 0;    //Иначе выводим ноль, для завершения генерации
 }
 
 void PrintGen(BMP *bmp, char* dirName, int index) { //Запись поколения в бмп файл
-    char fileName[100] = " ";
+    char fileName[100] = "";
     strcpy(fileName, dirName);  //В этих строчках просто формируем путь,название файла, расширение файла в одной строке
     strcat(fileName,"/");
     char indexStr[10];
@@ -169,11 +150,10 @@ void PrintGen(BMP *bmp, char* dirName, int index) { //Запись поколе�
     strcat(fileName, indexStr);
     strcat(fileName,".bmp");
 
-    FILE *file = fopen(fileName, "w");   //Открываем поток на запись
+    FILE *file = fopen(fileName, "wb");   //Открываем поток на запись
     fwrite(&bmp->fileHeader, sizeof(BitMapFileHeader), 1, file);    //Последовательно записываем каждую часть структуры BMP
     fwrite(&bmp->InfoHeader, sizeof(BitMapInfoHeader), 1, file);
     fwrite(&bmp->ColorTable, sizeof(bmp->ColorTable), 1, file);
-    //fseek(file,bmp->fileHeader.OffBits, SEEK_SET);
     for (int i = 0; i < bmp->InfoHeader.Height; ++i) {      //Запись массива пикселей в файл
         for (int j = 0; j < bmp->InfoHeader.Width + (3*bmp->InfoHeader.Width % 4); ++j) {
             fwrite(&bmp->arr[i][j], 1, 1,file);
@@ -184,32 +164,33 @@ void PrintGen(BMP *bmp, char* dirName, int index) { //Запись поколе�
 
 int main(int argc, char **argv) {
 
-    char fileName[50] = "";
-    char dirName[50] = "";
-    unsigned long long maxIter = 0;
-    int dumpFreq = 1;
-    for (int i = 1; i < argc; i += 2) {
+    char fileName[50] = "";     //Имя входного файла
+    char dirName[50] = "";  //Имя директироии
+    unsigned long long maxIter = 0;     //Максимальное число генераций поколений
+    int dumpFreq = 1;   //Частота сохранения поколений
+    for (int i = 1; i < argc; i += 2) {     //Анализируем введенные аргументы
         if (argv[i][2] == 'i') strcpy(fileName, argv[i + 1]);
         if (argv[i][2] == 'o') strcpy(dirName, argv[i + 1]);
-        if (argv[i][2] == 'm') maxIter = atoi(argv[i + 1]);
-        if (argv[i][2] == 'd') dumpFreq = atoi(argv[i + 1]);
+        if (argv[i][2] == 'm') maxIter = atoi(argv[i + 1]);     //преобразуем строу в число
+        if (argv[i][2] == 'd') dumpFreq = atoi(argv[i + 1]);    //То же самое
     }
 
-    BMP* fbmp = ReadBMPFile(fileName);
-    unsigned long long pointCount = 1;
-    unsigned long long count = 0;
+    BMP* bmp = ReadBMPFile(fileName);
+    unsigned long long pointCount = 1;      //Количество "живых" клеток
+    unsigned long long count = 0;   //Количество уже сгенерированных поколений
 
     while (pointCount > 0) {
+        pointCount = Logic(bmp);
+        if (pointCount == 0) break;     //Если живых клеток нет конец генерации
+
+        if (count % (dumpFreq + 0) == 0) {    //Запись поколений с требуемой частотой
+            PrintGen(bmp, dirName, count + 1);
+        }
         count++;
-        pointCount = Logic(fbmp);
-        if (pointCount == 0) break;
-        PrintGen(fbmp, dirName, count);
-        if (count == maxIter) break;
+
+        if (count == maxIter) break;    //Если количестов генераций равно количеству требуемых конец генерации
     }
-    /*for (int i = 0; i < 256; ++i) {
-        printf("%d ",fbmp->ColorTable[i]);
-    }*/
-    //PixelInfo(fbmp);
-    Free(fbmp, fbmp->arr, fbmp->InfoHeader.Width, fbmp->InfoHeader.Height);
+
+    Free(bmp, bmp->arr, bmp->InfoHeader.Width, bmp->InfoHeader.Height); //Освобожжение выделенной памяти
     return 0;
  }
