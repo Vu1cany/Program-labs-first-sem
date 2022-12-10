@@ -327,8 +327,12 @@ int main(int argc, char **argv) {
             } else if (!memcmp(command, "--value", strlen(command))) {
                 newFrameVal = malloc(sizeof(newFrameVal[0]) * strlen(value) + 1);
                 newFrameVal[0] = ' ';
-                strcat(newFrameVal, value);
-                valFlag = 1;
+                if (value[0] == '"') {  //Если пользователь ввел информацию с пробелами
+                    strncat(newFrameVal, &value[1], strlen(value) - 1);
+                } else {
+                    strcat(newFrameVal, value);
+                    valFlag = 1;
+                }
             }
             free(value);
 
