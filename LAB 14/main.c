@@ -195,6 +195,7 @@ void GetMP3(char *filepath, char *frameName) {
                 printf("%c", ch);
             }
         }
+        printf("\n\n");
     } else {    //Если требуемого фрейма нет
         printf("\nERROR: THERE IS NO SUCH FRAME IN FILE NAMED \"%s\"\n\n", filepath);
     }
