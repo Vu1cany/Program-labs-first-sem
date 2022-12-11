@@ -37,6 +37,11 @@ typedef struct {
 BMP* ReadBMPFile(char *fileName) {   //Функция для считывания BMP
     FILE* file = fopen(fileName, "rb");  //Открываем поток на чтение
 
+    if (file == NULL) {     //если файл не удалось открыть
+        printf("\nERROR: COULD\'T OPEN THE FILE NAMED \"%s\"\n\n", fileName);
+        return NULL;
+    }
+
     BMP* bmp = malloc(sizeof(BMP));
 
     fread(&bmp->fileHeader, sizeof(BitMapFileHeader), 1, file); //читаем структуру заголовка файла
@@ -54,7 +59,13 @@ BMP* ReadBMPFile(char *fileName) {   //Функция для считывани�
         }
     }
 
-    fclose(file);   //Закрываем поток чтения
+    int closeError = fclose(file);   //Закрываем поток
+
+    if (closeError != 0 ) {     //если не получилось закрыть файл
+        printf("\nERROR: COULD\'T CLOSE THE FILE NAMED \"%s\"\n\n", fileName);
+        return NULL;
+    }
+
     return bmp;
 }
 
@@ -67,10 +78,10 @@ void Free(BMP *bmp, char** array, unsigned int width, unsigned int height) {    
     free(bmp);  //Освобождение памяти для структуры заголовков
 }
 
-unsigned long long Logic(BMP *bmp) {
+long long Logic(BMP *bmp) {
     unsigned char ArrNew[bmp->InfoHeader.Height][bmp->InfoHeader.Width];    //Массив новых пикселей
 
-    short flag = 0;
+    short flag = 0; //Флаг станет 1 если вселенная игры хоть как-то изменилась
 
     for (int i = bmp->InfoHeader.Height - 1; i >= 0; --i) {
         for (int j = 0; j < bmp->InfoHeader.Width; ++j) {
@@ -138,10 +149,10 @@ unsigned long long Logic(BMP *bmp) {
     }
     if (flag) {     //Если картинка хоть как-то изменилась то выводим количиство пикслей
         return pointCount;
-    } else return 0;    //Иначе выводим ноль, для завершения генерации
+    } else return -1;    //Иначе выводим ноль, для завершения генерации
 }
 
-void PrintGen(BMP *bmp, char* dirName, int index) { //Запись поколения в бмп файл
+short PrintGen(BMP *bmp, char* dirName, int index) { //Запись поколения в бмп файл
     char fileName[100] = "";
     strcpy(fileName, dirName);  //В этих строчках просто формируем путь,название файла, расширение файла в одной строке
     strcat(fileName,"/");
@@ -151,6 +162,12 @@ void PrintGen(BMP *bmp, char* dirName, int index) { //Запись поколе�
     strcat(fileName,".bmp");
 
     FILE *file = fopen(fileName, "wb");   //Открываем поток на запись
+
+    if (file == NULL) {     //если файл не удалось открыть
+        printf("\nERROR: COULD\'T CREATE THE FILE NAMED \"%s\"\n\n", fileName);
+        return 1;
+    }
+
     fwrite(&bmp->fileHeader, sizeof(BitMapFileHeader), 1, file);    //Последовательно записываем каждую часть структуры BMP
     fwrite(&bmp->InfoHeader, sizeof(BitMapInfoHeader), 1, file);
     fwrite(&bmp->ColorTable, sizeof(bmp->ColorTable), 1, file);
@@ -159,7 +176,13 @@ void PrintGen(BMP *bmp, char* dirName, int index) { //Запись поколе�
             fwrite(&bmp->arr[i][j], 1, 1,file);
         }
     }
-    fclose(file); //Закрываем поток
+    int closeError = fclose(file);   //Закрываем поток
+
+    if (closeError != 0 ) {     //если не получилось закрыть файл
+        printf("\nERROR: COULD\'T CLOSE THE FILE NAMED \"%s\"\n\n", fileName);
+        return 1;
+    }
+    return 0;
 }
 
 int main(int argc, char **argv) {
@@ -169,28 +192,45 @@ int main(int argc, char **argv) {
     unsigned long long maxIter = 0;     //Максимальное число генераций поколений
     int dumpFreq = 1;   //Частота сохранения поколений
     for (int i = 1; i < argc; i += 2) {     //Анализируем введенные аргументы
-        if (argv[i][2] == 'i') strcpy(fileName, argv[i + 1]);
-        if (argv[i][2] == 'o') strcpy(dirName, argv[i + 1]);
-        if (argv[i][2] == 'm') maxIter = atoi(argv[i + 1]);     //преобразуем строу в число
-        if (argv[i][2] == 'd') dumpFreq = atoi(argv[i + 1]);    //То же самое
+        if (!memcmp(argv[i], "--input", strlen(argv[i]))) {
+            strcpy(fileName, argv[i + 1]);
+
+        } else if (!memcmp(argv[i], "--output", strlen(argv[i]))) {
+            strcpy(dirName, argv[i + 1]);
+
+        } else if (!memcmp(argv[i], "--max_iter", strlen(argv[i]))) {
+            maxIter = atoi(argv[i + 1]);     //преобразуем строу в число
+
+        } else if (!memcmp(argv[i], "--dump_freq", strlen(argv[i]))) {
+            dumpFreq = atoi(argv[i + 1]);    //То же самое
+
+        } else {
+            printf("\nERROR: INCORRECT INPUT FORMAT\n\n");
+        }
     }
 
     BMP* bmp = ReadBMPFile(fileName);
+
+    if (bmp == NULL) return 1;
+
     unsigned long long pointCount = 1;      //Количество "живых" клеток
     unsigned long long count = 0;   //Количество уже сгенерированных поколений
 
     while (pointCount > 0) {
         pointCount = Logic(bmp);
-        if (pointCount == 0) break;     //Если живых клеток нет конец генерации
+        if (pointCount == -1) break;     //Если живых клеток нет конец генерации
 
         if (count % (dumpFreq + 0) == 0) {    //Запись поколений с требуемой частотой
-            PrintGen(bmp, dirName, count + 1);
+            short printError = PrintGen(bmp, dirName, count + 1);
+            if (printError == 1) {
+                return 1;
+            }
         }
         count++;
 
         if (count == maxIter) break;    //Если количестов генераций равно количеству требуемых конец генерации
     }
-
+    printf("\nSUCCESSFULLY\n\n");
     Free(bmp, bmp->arr, bmp->InfoHeader.Width, bmp->InfoHeader.Height); //Освобожжение выделенной памяти
     return 0;
  }
